@@ -4,7 +4,12 @@ exports.sendUserByUsername = user => {
   return connection
     .select("*")
     .from("users")
+    .where(user, "=", "username")
     .then(user => {
-      return user;
+      if (!user.length) {
+        return Promise.reject({ status: 400, msg: "Username is non existent" });
+      } else {
+        return user;
+      }
     });
 };
