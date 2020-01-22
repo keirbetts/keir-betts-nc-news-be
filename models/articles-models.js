@@ -55,41 +55,31 @@ exports.sendPatchedArticle = (id, body) => {
 };
 
 exports.sendPostedComment = (id, body) => {
-  if (id < 13) {
-    body.username = body.author;
-    delete body.username;
-    return connection
-      .where("article_id", "=", id)
-      .insert(body)
-      .into("comments")
-      .returning("*")
-      .then(comment => {
-        //if (!comment) {
-        let newComm = { ...comment };
-        newComm.article_id = comment.id;
-        return newComm;
-        // } else {
-        // return Promise.reject({ status: 400, msg: "Body is incorrect!" });
-        //}
-      });
-  } else {
-    return Promise.reject({ status: 404, msg: "Id is non-existent" });
-  }
+  body.author = body.username;
+  delete body.username;
+  body.article_id = id;
+  return connection
+    .insert(body)
+    .into("comments")
+    .returning("*")
+    .then(comment => {
+      if (comment.length > 0) return comment;
+      else {
+        return Promise.reject({ status: 404, msg: "Id is non-existent" });
+      }
+    });
 };
 
 exports.sendAllComments = (id, sort_by = "created_at", order = "desc") => {
-  console.log(id);
-  //console.log(+id.article_id === typeof Number);
-  if (id < 13) {
-    return connection
-      .select("*")
-      .from("comments")
-      .where("article_id", "=", id)
-      .orderBy(sort_by, order)
-      .then(comment => {
-        return comment;
-      });
-  } else {
-    return Promise.reject({ status: 404, msg: "Id does not exist!" });
-  }
+  return connection
+    .select("*")
+    .from("comments")
+    .where("article_id", "=", id)
+    .orderBy(sort_by, order)
+    .then(comment => {
+      if (comment.length > 0) return comment;
+      else {
+        return Promise.reject({ status: 404, msg: "Id does not exist!" });
+      }
+    });
 };

@@ -21,6 +21,11 @@ describe("/api", () => {
         });
     });
   });
+  describe("GET", () => {
+    /*it('Status: 200 responds with a JSON describing all available endpoints on the API', () => {
+      return request(app).get('/api')
+    })*/
+  });
   describe("api/topics", () => {
     describe("GET", () => {
       it("Status: 200 responds with an array of topic objects with the correct properties", () => {
@@ -227,6 +232,7 @@ describe("/api", () => {
                 "created_at",
                 "comment_count"
               );
+              expect(body.article[0].comment_count).to.equal("13");
             });
         });
 
@@ -374,8 +380,7 @@ describe("/api", () => {
               .post("/api/articles/1/comments")
               .send({
                 username: "butter_bridge",
-                body: "comment lalal...",
-                article_id: 1
+                body: "comment lalal..."
               })
               .expect(201)
               .then(({ body }) => {
@@ -424,24 +429,14 @@ describe("/api", () => {
             });
             it("Status: 422 when posting a correctly formatted object with a reference id that does not exist", () => {
               return request(app)
-                .post("/api/articles/1/comments")
+                .post("/api/articles/75000/comments")
                 .send({
                   username: "notAuser",
-                  body: "comment lalal...",
-                  article_id: 75000
+                  body: "comment lalal..."
                 })
                 .expect(422)
                 .then(({ body }) => {
                   expect(body.msg).to.equal("Reference id does not exist");
-                });
-            });
-            it("Status: 404 for a valid but non-existent id", () => {
-              return request(app)
-                .post("/api/articles/28000/comments")
-                .send({ username: "butter_bridge", body: "comment lalal..." })
-                .expect(404)
-                .then(({ body }) => {
-                  expect(body.msg).to.equal("Id is non-existent");
                 });
             });
             it("Status: 400 for an invalid id", () => {
@@ -451,7 +446,9 @@ describe("/api", () => {
                 .send({ username: "butter_bridge", body: "comment lalal..." })
                 .expect(400)
                 .then(({ body }) => {
-                  expect(body.msg).to.equal("Bad request");
+                  expect(body.msg).to.equal(
+                    "Bad Request-You have done something wrong!"
+                  );
                 });
             });
           });
@@ -548,7 +545,7 @@ describe("/api", () => {
           });
         });
         describe("ERRORS, GET", () => {
-          it.only("Status: 404 for a valid but non-existent id", () => {
+          it("Status: 404 for a valid but non-existent id", () => {
             return request(app)
               .get("/api/articles/28000/comments")
               .expect(404)
@@ -556,8 +553,7 @@ describe("/api", () => {
                 expect(body.msg).to.equal("Id does not exist!");
               });
           });
-          it.only("Status: 400 for an invalid id", () => {
-            //NOT PASSING
+          it("Status: 400 for an invalid id", () => {
             return request(app)
               .get("/api/articles/notAnId/comments")
               .expect(400)
