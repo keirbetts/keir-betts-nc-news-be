@@ -1,5 +1,5 @@
 exports.handle400s = (err, req, res, next) => {
-  console.log(err);
+  //console.log(err);
   const codes = ["22P02", "42703", "23502"];
   if (codes.includes(err.code)) {
     res.status(400).send({ msg: "Bad Request-You have done something wrong!" });
@@ -24,6 +24,6 @@ exports.send405Error = (req, res, next) => {
 };
 
 exports.handle500s = (err, req, res, next) => {
-  console.log(err);
+  // console.log(err);
   res.status(500).send({ msg: "server error" });
 };

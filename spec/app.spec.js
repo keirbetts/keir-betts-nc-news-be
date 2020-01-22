@@ -123,7 +123,7 @@ describe("/api", () => {
             "topic",
             "created_at",
             "votes",
-            "comment_count" //RETURN TO THIS JOIN!!!
+            "comment_count"
           );
         });
     });
@@ -426,7 +426,7 @@ describe("/api", () => {
               return request(app)
                 .post("/api/articles/1/comments")
                 .send({
-                  username: "butter_bridge",
+                  username: "notAuser",
                   body: "comment lalal...",
                   article_id: 75000
                 })
