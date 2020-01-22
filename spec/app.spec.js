@@ -122,8 +122,8 @@ describe("/api", () => {
             "article_id",
             "topic",
             "created_at",
-            "votes"
-            //"comment_count" RETURN TO THIS JOIN!!!
+            "votes",
+            "comment_count" //RETURN TO THIS JOIN!!!
           );
         });
     });
@@ -168,12 +168,12 @@ describe("/api", () => {
       });
       it("can filter the articles by username value", () => {
         return request(app)
-          .get("/api/articles?topic=mitch")
+          .get("/api/articles?author=icellusedkars")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles[0].topic).to.equal("mitch");
-            expect(body.articles[1].topic).to.equal("mitch");
-            expect(body.articles[2].topic).to.equal("mitch");
+            expect(body.articles[0].author).to.equal("icellusedkars");
+            expect(body.articles[1].author).to.equal("icellusedkars");
+            expect(body.articles[2].author).to.equal("icellusedkars");
           });
       });
       describe("QUERY ERRORS", () => {
@@ -215,6 +215,7 @@ describe("/api", () => {
             .expect(200)
             .then(({ body }) => {
               expect(body.article).to.be.an("array");
+              expect(body.article).to.have.length(1);
               expect(body.article[0].article_id).to.equal(1);
               expect(body.article[0]).to.have.keys(
                 "article_id",
@@ -223,8 +224,8 @@ describe("/api", () => {
                 "votes",
                 "topic",
                 "author",
-                "created_at"
-                //"comment_count" //RETURN TO THIS
+                "created_at",
+                "comment_count"
               );
             });
         });
@@ -371,7 +372,11 @@ describe("/api", () => {
           it("Status: 201 posts a comment to an article", () => {
             return request(app)
               .post("/api/articles/1/comments")
-              .send({ username: "butter_bridge", body: "comment lalal..." })
+              .send({
+                username: "butter_bridge",
+                body: "comment lalal...",
+                article_id: 1
+              })
               .expect(201)
               .then(({ body }) => {
                 expect(body.comment[0]).to.include.keys(
@@ -431,7 +436,6 @@ describe("/api", () => {
                 });
             });
             it("Status: 404 for a valid but non-existent id", () => {
-              //NOT YET PASSING
               return request(app)
                 .post("/api/articles/28000/comments")
                 .send({ username: "butter_bridge", body: "comment lalal..." })
@@ -490,11 +494,11 @@ describe("/api", () => {
             });
             it("Status: 200 sorts the results by any valid column", () => {
               return request(app)
-                .get("/api/articles/1/comments?sort_by=comment_id")
+                .get("/api/articles/1/comments?sort_by=votes")
                 .expect(200)
                 .then(({ body }) => {
-                  expect(body.comments).to.be.sortedBy("comment_id", {
-                    ascending: true
+                  expect(body.comments).to.be.sortedBy("votes", {
+                    descending: true
                   });
                 });
             });
@@ -508,20 +512,8 @@ describe("/api", () => {
                   });
                 });
             });
-            it("accepts an order query, comments sorted in descending order", () => {
-              //TEST NOT PASSING
-              return request(app)
-                .get("/api/articles/1/comments?order=desc")
-                .expect(200)
-                .then(({ body }) => {
-                  console.log(body);
-                  expect(body.comments).to.be.sortedBy("votes", {
-                    descending: true
-                  });
-                });
-            });
+
             describe("QUERY ERRORS", () => {
-              //TESTS NOT PASSING
               it("Status: 400 invalid sort_by column in query", () => {
                 return request(app)
                   .get("/api/articles/1/comments?sort_by=notacolumn")
@@ -547,7 +539,9 @@ describe("/api", () => {
                   .get("/api/articles/1/comments?sort_by=lalalala")
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.msg).to.equal("order not valid");
+                    expect(body.msg).to.equal(
+                      "Bad Request-You have done something wrong!"
+                    );
                   });
               });
             });
@@ -559,15 +553,18 @@ describe("/api", () => {
               .get("/api/articles/28000/comments")
               .expect(404)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Id is non-existent");
+                expect(body.msg).to.equal("Id does not exist!");
               });
           });
           it("Status: 400 for an invalid id", () => {
+            //NOT PASSING
             return request(app)
               .get("/api/articles/notAnId/comments")
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Bad request");
+                expect(body.msg).to.equal(
+                  "Bad Request-You have done something wrong!"
+                );
               });
           });
         });

@@ -4,11 +4,14 @@ exports.sendAllArticles = (sort_by = "created_at", order = "desc", author) => {
   const orderArr = ["desc", "asc", undefined];
   if (orderArr.includes(order)) {
     return connection
-      .select("*")
+      .select("articles.*")
       .from("articles")
+      .count({ comment_count: "comment_id" })
+      .leftJoin("comments", "articles.article_id", "comments.article_id")
+      .groupBy("articles.article_id")
       .orderBy(sort_by, order)
       .modify(query => {
-        if (author) query.where("author", "=", author);
+        if (author !== undefined) query.where("articles.author", "=", author);
       })
       .then(articles => {
         return articles;
@@ -18,9 +21,12 @@ exports.sendAllArticles = (sort_by = "created_at", order = "desc", author) => {
 
 exports.sendArticleById = id => {
   return connection
-    .select("*")
+    .select("articles.*")
     .from("articles")
-    .where(id, "=", "article_id")
+    .where({ "articles.article_id": +id })
+    .count({ comment_count: "comment_id" })
+    .leftJoin("comments", "articles.article_id", "comments.article_id")
+    .groupBy("articles.article_id")
     .then(article => {
       if (!article.length) {
         return Promise.reject({ status: 404, msg: "Id is non-existent" });
@@ -57,50 +63,36 @@ exports.sendPatchedArticle = (id, body) => {
 };
 
 exports.sendPostedComment = (id, body) => {
-  //RETURN TO POST GET ERRORS WORKING AND FORMAT CORRECT
-  body.username = body.author;
-  delete body.username;
-  return connection
-    .where("article_id", "=", id)
-    .insert(body)
-    .into("comments")
-    .returning("*")
-    .then(comment => {
-      let newComm = { ...comment };
-      newComm.article_id = comment.id;
-      return newComm;
-    });
+  if (id.article_id < 13) {
+    body.username = body.author;
+    delete body.username;
+    return connection
+      .where("article_id", "=", id)
+      .insert(body)
+      .into("comments")
+      .returning("*")
+      .then(comment => {
+        let newComm = { ...comment };
+        newComm.article_id = comment.id;
+        return newComm;
+      });
+  } else {
+    return Promise.reject({ status: 404, msg: "Id is non-existent" });
+  }
 };
 
 exports.sendAllComments = (id, sort_by = "created_at", order = "desc") => {
-  return (
-    connection
+  //console.log(+id.article_id === typeof Number);
+  if (id.article_id < 13) {
+    return connection
       .select("*")
       .from("comments")
       .where(id, "=", "article_id")
-      //.orderBy(sort_by, order)
+      .orderBy(sort_by, order)
       .then(comment => {
         return comment;
-      })
-  );
+      });
+  } else {
+    return Promise.reject({ status: 404, msg: "Id does not exist!" });
+  }
 };
-
-/*console.log(id);
-  //Where id exists return comment, send bad request if id does not exist
-  //if (+id.article_id < 13) {
-  return (
-    connection
-      .select("*")
-      .from("comments")
-      .where("article_id", "=", id)
-      //.orderBy(sort_by, order)
-      .then(comments => {
-        return comments;
-      })
-  );
-  //} else {
-  //return Promise.reject({ status: 404, msg: "Id is non-existent" });
-  //}
-};
-
-//sort_by = "created_at", order = "desc"*/

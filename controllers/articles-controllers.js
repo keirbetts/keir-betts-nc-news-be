@@ -15,7 +15,7 @@ exports.getAllArticles = (req, res, next) => {
 };
 
 exports.getArticleById = (req, res, next) => {
-  sendArticleById(req.params)
+  sendArticleById(req.params.article_id)
     .then(article => {
       res.status(200).send({ article });
     })

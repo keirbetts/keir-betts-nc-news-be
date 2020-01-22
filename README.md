@@ -130,7 +130,7 @@ GET /api/articles/:article_id DONE except comment count
 PATCH /api/articles/:article_id DONE
 
 POST /api/articles/:article_id/comments
-GET /api/articles/:article_id/comments
+GET /api/articles/:article_id/comments DONE, except empty array error which needs to be dealt with
 
 GET /api/articles DONE except comment count
 
