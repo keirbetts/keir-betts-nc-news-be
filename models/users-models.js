@@ -8,8 +8,7 @@ exports.sendUserByUsername = user => {
     .then(user => {
       if (!user.length) {
         return Promise.reject({ status: 400, msg: "Username is non existent" });
-      } else {
-        return user;
       }
+      return user;
     });
 };
