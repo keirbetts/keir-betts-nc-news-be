@@ -233,5 +233,6 @@ describe("formatComments", () => {
         created_at: 1511354163389
       }
     ]);
+    expect(refObj2).to.eql({ "They're not exactly dogs, are they?": 9 });
   });
 });

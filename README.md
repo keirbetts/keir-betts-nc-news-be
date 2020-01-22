@@ -126,13 +126,13 @@ GET /api/topics DONE
 
 GET /api/users/:username DONE
 
-GET /api/articles/:article_id DONE except comment count
+GET /api/articles/:article_id DONE
 PATCH /api/articles/:article_id DONE
 
 POST /api/articles/:article_id/comments
 GET /api/articles/:article_id/comments DONE, except empty array error which needs to be dealt with
 
-GET /api/articles DONE except comment count
+GET /api/articles DONE
 
 PATCH /api/comments/:comment_id DONE
 DELETE /api/comments/:comment_id DONE

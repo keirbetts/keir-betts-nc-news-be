@@ -35,14 +35,6 @@ exports.sendArticleById = id => {
     });
 };
 
-//.count({ comment_count: "comments.article_id" })
-//.leftJoin("comments", "articles.article_id", "comments.article_id")
-//.groupBy("articles.article_id")
-
-//add comment count to each article .count() select comments.belongsTo
-//join to comments table leftjoin comments.belongsto
-//group by
-
 exports.sendPatchedArticle = (id, body) => {
   if (Object.keys(body).length > 0) {
     return connection
@@ -63,7 +55,7 @@ exports.sendPatchedArticle = (id, body) => {
 };
 
 exports.sendPostedComment = (id, body) => {
-  if (id.article_id < 13) {
+  if (id < 13) {
     body.username = body.author;
     delete body.username;
     return connection
@@ -72,9 +64,13 @@ exports.sendPostedComment = (id, body) => {
       .into("comments")
       .returning("*")
       .then(comment => {
+        //if (!comment) {
         let newComm = { ...comment };
         newComm.article_id = comment.id;
         return newComm;
+        // } else {
+        // return Promise.reject({ status: 400, msg: "Body is incorrect!" });
+        //}
       });
   } else {
     return Promise.reject({ status: 404, msg: "Id is non-existent" });
@@ -82,12 +78,13 @@ exports.sendPostedComment = (id, body) => {
 };
 
 exports.sendAllComments = (id, sort_by = "created_at", order = "desc") => {
+  console.log(id);
   //console.log(+id.article_id === typeof Number);
-  if (id.article_id < 13) {
+  if (id < 13) {
     return connection
       .select("*")
       .from("comments")
-      .where(id, "=", "article_id")
+      .where("article_id", "=", id)
       .orderBy(sort_by, order)
       .then(comment => {
         return comment;

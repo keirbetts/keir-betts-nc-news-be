@@ -31,7 +31,7 @@ exports.patchArticleById = (req, res, next) => {
 };
 
 exports.postCommentToArticle = (req, res, next) => {
-  sendPostedComment(req.params, req.body)
+  sendPostedComment(req.params.article_id, req.body)
     .then(comment => {
       res.status(201).send({ comment });
     })
@@ -39,7 +39,7 @@ exports.postCommentToArticle = (req, res, next) => {
 };
 
 exports.getAllComments = (req, res, next) => {
-  sendAllComments(req.params, req.query.sort_by, req.query.order)
+  sendAllComments(req.params.article_id, req.query.sort_by, req.query.order)
     .then(comments => {
       res.status(200).send({ comments });
     })

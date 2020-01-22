@@ -548,7 +548,7 @@ describe("/api", () => {
           });
         });
         describe("ERRORS, GET", () => {
-          it("Status: 404 for a valid but non-existent id", () => {
+          it.only("Status: 404 for a valid but non-existent id", () => {
             return request(app)
               .get("/api/articles/28000/comments")
               .expect(404)
@@ -556,7 +556,7 @@ describe("/api", () => {
                 expect(body.msg).to.equal("Id does not exist!");
               });
           });
-          it("Status: 400 for an invalid id", () => {
+          it.only("Status: 400 for an invalid id", () => {
             //NOT PASSING
             return request(app)
               .get("/api/articles/notAnId/comments")
