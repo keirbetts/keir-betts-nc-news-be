@@ -22,9 +22,10 @@ describe("/api", () => {
     });
   });
   describe("GET", () => {
-    /*it('Status: 200 responds with a JSON describing all available endpoints on the API', () => {
-      return request(app).get('/api')
-    })*/
+    it("Status: 200 responds with a JSON describing all available endpoints on the API", () => {
+      return request(app).get("/api");
+      //fs.readfile
+    });
   });
   describe("api/topics", () => {
     describe("GET", () => {
