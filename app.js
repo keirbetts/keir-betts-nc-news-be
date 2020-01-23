@@ -11,7 +11,6 @@ const {
 app.use(express.json());
 app.use("/api", apiRouter);
 
-//ERRORS
 app.use(handle400s);
 app.use(handle422s);
 app.use(handleCustomErrors);
