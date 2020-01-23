@@ -69,9 +69,8 @@ describe("/api", () => {
           .get("/api/users/butter_bridge")
           .expect(200)
           .then(({ body }) => {
-            expect(body.user).to.be.an("array");
-            expect(body.user[0].username).to.equal("butter_bridge");
-            expect(body.user).that.have.length(1);
+            expect(body.user).to.be.an("object");
+            expect(body.user.username).to.equal("butter_bridge");
           });
       });
     });
@@ -115,6 +114,18 @@ describe("/api", () => {
         .then(({ body }) => {
           expect(body.msg).to.equal("Route not found!");
         });
+    });
+    it("Status: 405 for an invalid method", () => {
+      const methods = ["put", "post", "patch", "delete"];
+      const methodPromises = methods.map(method => {
+        return request(app)
+          [method]("/api/articles")
+          .expect(405)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("method not allowed");
+          });
+      });
+      return Promise.all(methodPromises);
     });
     it("Status: 200 responds with an array of articles with the correct keys", () => {
       return request(app)
@@ -167,9 +178,9 @@ describe("/api", () => {
           .get("/api/articles?author=butter_bridge")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles[0].author).to.equal("butter_bridge");
-            expect(body.articles[1].author).to.equal("butter_bridge");
-            expect(body.articles[2].author).to.equal("butter_bridge");
+            body.articles.forEach(article => {
+              expect(article.author).to.equal("butter_bridge");
+            });
           });
       });
       it("can filter the articles by username value", () => {
@@ -177,9 +188,9 @@ describe("/api", () => {
           .get("/api/articles?author=icellusedkars")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles[0].author).to.equal("icellusedkars");
-            expect(body.articles[1].author).to.equal("icellusedkars");
-            expect(body.articles[2].author).to.equal("icellusedkars");
+            body.articles.forEach(article => {
+              expect(article.author).to.equal("icellusedkars");
+            });
           });
       });
       it("can filter the articles by topic", () => {
@@ -187,9 +198,9 @@ describe("/api", () => {
           .get("/api/articles?topic=mitch")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles[4].topic).to.equal("mitch");
-            expect(body.articles[1].topic).to.equal("mitch");
-            expect(body.articles[2].topic).to.equal("mitch");
+            body.articles.forEach(article => {
+              expect(article.topic).to.equal("mitch");
+            });
           });
       });
       it("serves an empty array when topic exists but has no articles", () => {
@@ -238,10 +249,9 @@ describe("/api", () => {
             .get("/api/articles/1")
             .expect(200)
             .then(({ body }) => {
-              expect(body.article).to.be.an("array");
-              expect(body.article).to.have.length(1);
-              expect(body.article[0].article_id).to.equal(1);
-              expect(body.article[0]).to.have.keys(
+              expect(body.article).to.be.an("object");
+              expect(body.article.article_id).to.equal(1);
+              expect(body.article).to.have.keys(
                 "article_id",
                 "title",
                 "body",
@@ -251,7 +261,7 @@ describe("/api", () => {
                 "created_at",
                 "comment_count"
               );
-              expect(body.article[0].comment_count).to.equal("13");
+              expect(body.article.comment_count).to.equal("13");
             });
         });
 
@@ -303,7 +313,8 @@ describe("/api", () => {
             .send({ inc_votes: 1 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.article[0].votes).to.equal(101);
+              expect(body.article).to.be.an("object");
+              expect(body.article.votes).to.equal(101);
             });
         });
         it("Status: 200, can decrement votes", () => {
@@ -312,7 +323,7 @@ describe("/api", () => {
             .send({ inc_votes: -2 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.article[0].votes).to.equal(98);
+              expect(body.article.votes).to.equal(98);
             });
         });
         it("works for a different article", () => {
@@ -321,8 +332,7 @@ describe("/api", () => {
             .send({ inc_votes: 4 })
             .expect(200)
             .then(({ body }) => {
-              //This article does not previously have a votes column, is this test needed??
-              expect(body.article[0].votes).to.equal(4);
+              expect(body.article.votes).to.equal(4);
             });
         });
         describe("ERRORS", () => {
@@ -350,9 +360,17 @@ describe("/api", () => {
             return request(app)
               .patch("/api/articles/1")
               .send({})
-              .expect(400)
+              .expect(200)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Body is incorrect!");
+                expect(body.article).to.eql({
+                  article_id: 1,
+                  title: "Living in the shadow of a great man",
+                  body: "I find this existence challenging",
+                  votes: 100,
+                  topic: "mitch",
+                  author: "butter_bridge",
+                  created_at: "2018-11-15T12:21:54.171Z"
+                });
               });
           });
 
@@ -403,7 +421,7 @@ describe("/api", () => {
               })
               .expect(201)
               .then(({ body }) => {
-                expect(body.comment[0]).to.include.keys(
+                expect(body.comment).to.include.keys(
                   "body",
                   "comment_id",
                   "article_id",
@@ -459,7 +477,6 @@ describe("/api", () => {
                 });
             });
             it("Status: 400 for an invalid id", () => {
-              //NOT YET PASSING
               return request(app)
                 .post("/api/articles/notAnId/comments")
                 .send({ username: "butter_bridge", body: "comment lalal..." })
@@ -480,6 +497,13 @@ describe("/api", () => {
               .then(({ body }) => {
                 expect(body.comments).to.be.an("array");
                 expect(body.comments[0]).to.include.keys(
+                  "comment_id",
+                  "votes",
+                  "created_at",
+                  "author",
+                  "body"
+                );
+                expect(body.comments[1]).to.include.keys(
                   "comment_id",
                   "votes",
                   "created_at",
@@ -616,7 +640,8 @@ describe("/api", () => {
             .send({ inc_votes: 1 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.comment[0].votes).to.equal(17);
+              expect(body.comment).to.be.an("object");
+              expect(body.comment.votes).to.equal(17);
             });
         });
         it("Status: 200, can decrement votes", () => {
@@ -625,7 +650,7 @@ describe("/api", () => {
             .send({ inc_votes: -2 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.comment[0].votes).to.equal(14);
+              expect(body.comment.votes).to.equal(14);
             });
         });
         it("works for a different comment", () => {
@@ -634,7 +659,7 @@ describe("/api", () => {
             .send({ inc_votes: 4 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.comment[0].votes).to.equal(104);
+              expect(body.comment.votes).to.equal(104);
             });
         });
         describe("ERRORS", () => {
@@ -662,9 +687,17 @@ describe("/api", () => {
             return request(app)
               .patch("/api/comments/1")
               .send({})
-              .expect(400)
+              .expect(200)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Body is incorrect!");
+                expect(body.comment).to.eql({
+                  comment_id: 1,
+                  author: "butter_bridge",
+                  article_id: 9,
+                  votes: 16,
+                  created_at: "2017-11-22T12:36:03.389Z",
+                  body:
+                    "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
+                });
               });
           });
 

@@ -37,7 +37,7 @@ exports.sendArticleById = id => {
       if (!article.length) {
         return Promise.reject({ status: 404, msg: "Id is non-existent" });
       }
-      return article;
+      return article[0];
     });
 };
 
@@ -50,13 +50,20 @@ exports.sendPatchedArticle = (id, body) => {
       .increment("votes", body.inc_votes)
       .returning("*")
       .then(article => {
-        if (article.length > 0) return article;
+        if (article.length > 0) return article[0];
         else {
           return Promise.reject({ status: 404, msg: "Id is non-existent" });
         }
       });
   } else {
-    return Promise.reject({ status: 400, msg: "Body is incorrect!" });
+    return connection
+      .select("*")
+      .from("articles")
+      .where("article_id", "=", id)
+      .returning("*")
+      .then(article => {
+        return article[0];
+      });
   }
 };
 
@@ -69,7 +76,7 @@ exports.sendPostedComment = (id, body) => {
     .into("comments")
     .returning("*")
     .then(comment => {
-      if (comment.length > 0) return comment;
+      if (comment.length > 0) return comment[0];
       else {
         return Promise.reject({ status: 404, msg: "Id is non-existent" });
       }
