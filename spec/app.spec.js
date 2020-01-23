@@ -182,6 +182,24 @@ describe("/api", () => {
             expect(body.articles[2].author).to.equal("icellusedkars");
           });
       });
+      it("can filter the articles by topic", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles[4].topic).to.equal("mitch");
+            expect(body.articles[1].topic).to.equal("mitch");
+            expect(body.articles[2].topic).to.equal("mitch");
+          });
+      });
+      it("serves an empty array when topic exists but has no articles", () => {
+        return request(app)
+          .get("/api/articles?topic=paper")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).have.length(0);
+          });
+      });
       describe("QUERY ERRORS", () => {
         it("Status: 400 invalid sort_by column in query", () => {
           return request(app)

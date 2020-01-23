@@ -2,12 +2,18 @@ const {
   sendArticleById,
   sendPatchedArticle,
   sendPostedComment,
-  sendAllComments,
-  sendAllArticles
+  sendAllCommentsByArticleId,
+  sendAllArticles,
+  checkArticleExists
 } = require("../models/articles-models");
 
 exports.getAllArticles = (req, res, next) => {
-  sendAllArticles(req.query.sort_by, req.query.order, req.query.author)
+  sendAllArticles(
+    req.query.sort_by,
+    req.query.order,
+    req.query.author,
+    req.query.topic
+  )
     .then(articles => {
       res.status(200).send({ articles });
     })
@@ -39,8 +45,15 @@ exports.postCommentToArticle = (req, res, next) => {
 };
 
 exports.getAllComments = (req, res, next) => {
-  sendAllComments(req.params.article_id, req.query.sort_by, req.query.order)
-    .then(comments => {
+  Promise.all([
+    sendAllCommentsByArticleId(
+      req.params.article_id,
+      req.query.sort_by,
+      req.query.order
+    ),
+    checkArticleExists(req.params.article_id)
+  ])
+    .then(([comments]) => {
       res.status(200).send({ comments });
     })
     .catch(next);

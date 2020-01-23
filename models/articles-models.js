@@ -1,6 +1,11 @@
 const connection = require("../db/connection");
 
-exports.sendAllArticles = (sort_by = "created_at", order = "desc", author) => {
+exports.sendAllArticles = (
+  sort_by = "created_at",
+  order = "desc",
+  author,
+  topic
+) => {
   const orderArr = ["desc", "asc", undefined];
   if (orderArr.includes(order)) {
     return connection
@@ -12,6 +17,7 @@ exports.sendAllArticles = (sort_by = "created_at", order = "desc", author) => {
       .orderBy(sort_by, order)
       .modify(query => {
         if (author !== undefined) query.where("articles.author", "=", author);
+        if (topic !== undefined) query.where("articles.topic", "=", topic);
       })
       .then(articles => {
         return articles;
@@ -70,15 +76,28 @@ exports.sendPostedComment = (id, body) => {
     });
 };
 
-exports.sendAllComments = (id, sort_by = "created_at", order = "desc") => {
+exports.sendAllCommentsByArticleId = (
+  id,
+  sort_by = "created_at",
+  order = "desc"
+) => {
   return connection
     .select("*")
     .from("comments")
     .where("article_id", "=", id)
     .orderBy(sort_by, order)
     .then(comment => {
-      if (comment.length > 0) return comment;
-      else {
+      return comment;
+    });
+};
+
+exports.checkArticleExists = id => {
+  return connection
+    .select("*")
+    .from("articles")
+    .where("article_id", "=", id)
+    .then(article => {
+      if (!article.length) {
         return Promise.reject({ status: 404, msg: "Id does not exist!" });
       }
     });
