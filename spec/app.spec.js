@@ -85,46 +85,80 @@ describe("/api", () => {
       return Promise.all(methodPromises);
     });
   });
-  describe("/api/users/:username", () => {
-    describe("GET", () => {
-      it("Status 200: responds with a user topic with the correct properties", () => {
-        return request(app)
-          .get("/api/users/butter_bridge")
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.user).to.be.an("object");
-            expect(body.user.username).to.equal("butter_bridge");
-          });
-      });
+  describe("/api/users", () => {
+    it("Status: 200, responds with a users topic with the correct properties", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.users).to.be.an("array");
+          expect(body.users).have.length(4);
+          expect(body.users[0]).to.have.keys("username", "avatar_url", "name");
+        });
     });
-    describe("ERRORS, api/users/:username", () => {
-      it("Status: 404 when passed an incorrect path", () => {
-        return request(app)
-          .get("/api/usss")
-          .expect(404)
-          .then(({ body }) => {
-            expect(body.msg).to.equal("Route not found!");
-          });
-      });
-      it("Status: 400 when passed an non-existent username", () => {
-        return request(app)
-          .get("/api/users/notaUsername")
-          .expect(400)
-          .then(({ body }) => {
-            expect(body.msg).to.equal("Username is non existent");
-          });
-      });
+    describe("ERRORS", () => {
       it("Status: 405 for invalid method", () => {
         const methods = ["put", "patch", "delete", "post"];
         const methodPromises = methods.map(method => {
           return request(app)
-            [method]("/api/topics")
+            [method]("/api/users")
             .expect(405)
             .then(({ body }) => {
               expect(body.msg).to.equal("method not allowed");
             });
         });
         return Promise.all(methodPromises);
+      });
+      it("Status: 404 when passed an incorrect path", () => {
+        return request(app)
+          .get("/api/user")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Route not found!");
+          });
+      });
+    });
+    describe("/api/users/:username", () => {
+      describe("GET", () => {
+        it("Status 200: responds with a user topic with the correct properties", () => {
+          return request(app)
+            .get("/api/users/butter_bridge")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.user).to.be.an("object");
+              expect(body.user.username).to.equal("butter_bridge");
+            });
+        });
+      });
+      describe("ERRORS, api/users/:username", () => {
+        it("Status: 404 when passed an incorrect path", () => {
+          return request(app)
+            .get("/api/usss")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Route not found!");
+            });
+        });
+        it("Status: 400 when passed an non-existent username", () => {
+          return request(app)
+            .get("/api/users/notaUsername")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Username is non existent");
+            });
+        });
+        it("Status: 405 for invalid method", () => {
+          const methods = ["put", "patch", "delete", "post"];
+          const methodPromises = methods.map(method => {
+            return request(app)
+              [method]("/api/topics")
+              .expect(405)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("method not allowed");
+              });
+          });
+          return Promise.all(methodPromises);
+        });
       });
     });
   });
