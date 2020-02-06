@@ -4,7 +4,8 @@ const {
   sendPostedComment,
   sendAllCommentsByArticleId,
   sendAllArticles,
-  checkArticleExists
+  checkArticleExists,
+  sendDeleted
 } = require("../models/articles-models");
 
 exports.getAllArticles = (req, res, next) => {
@@ -24,6 +25,20 @@ exports.getArticleById = (req, res, next) => {
   sendArticleById(req.params.article_id)
     .then(article => {
       res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+exports.deleteArticleById = (req, res, next) => {
+  sendDeleted(req.params.article_id)
+    .then(deleteCount => {
+      if (deleteCount > 0) res.sendStatus(204);
+      else {
+        return Promise.reject({
+          status: 404,
+          msg: "article_id does not exist!"
+        });
+      }
     })
     .catch(next);
 };

@@ -98,6 +98,12 @@ exports.sendAllCommentsByArticleId = (
     });
 };
 
+exports.sendDeleted = id => {
+  return connection("articles")
+    .where("article_id", "=", id)
+    .del();
+};
+
 exports.checkArticleExists = id => {
   return connection
     .select("*")

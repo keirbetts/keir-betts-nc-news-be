@@ -331,6 +331,7 @@ describe("/api", () => {
                 expect(body.msg).to.equal("Route not found!");
               });
           });
+
           it("Status: 404 for a valid but non-existent id", () => {
             return request(app)
               .get("/api/articles/28000")
@@ -350,7 +351,7 @@ describe("/api", () => {
               });
           });
           it("Status: 405 for invalid method", () => {
-            const methods = ["put", "delete"];
+            const methods = ["put"];
             const methodPromises = methods.map(method => {
               return request(app)
                 [method]("/api/articles/1")
@@ -440,6 +441,23 @@ describe("/api", () => {
                 expect(body.msg).to.equal(
                   "Bad Request-You have done something wrong!"
                 );
+              });
+          });
+        });
+      });
+      describe("DELETE", () => {
+        it("Status: 204, deletes an article by its id", () => {
+          return request(app)
+            .delete("/api/articles/1")
+            .expect(204);
+        });
+        describe("ERROR", () => {
+          it("Status: 404 when comment does not exist", () => {
+            return request(app)
+              .delete("/api/articles/4000")
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("article_id does not exist!");
               });
           });
         });
