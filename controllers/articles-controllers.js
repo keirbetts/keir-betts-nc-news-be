@@ -5,17 +5,28 @@ const {
   sendAllCommentsByArticleId,
   sendAllArticles,
   checkArticleExists,
-  sendDeleted
+  sendDeleted,
+  checkTopicExists,
+  checkAuthorExists
 } = require("../models/articles-models");
 
 exports.getAllArticles = (req, res, next) => {
-  sendAllArticles(
-    req.query.sort_by,
-    req.query.order,
-    req.query.author,
-    req.query.topic
-  )
-    .then(articles => {
+  const promiseArr = [
+    sendAllArticles(
+      req.query.sort_by,
+      req.query.order,
+      req.query.author,
+      req.query.topic
+    )
+  ];
+  if (req.query.topic !== undefined) {
+    promiseArr.push(checkTopicExists(req.query.topic));
+  }
+  if (req.query.author !== undefined) {
+    promiseArr.push(checkAuthorExists(req.query.author));
+  }
+  Promise.all(promiseArr)
+    .then(([articles]) => {
       res.status(200).send({ articles });
     })
     .catch(next);

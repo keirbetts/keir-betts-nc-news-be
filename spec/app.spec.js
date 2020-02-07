@@ -11,7 +11,7 @@ beforeEach(() => connection.seed.run());
 after(() => connection.destroy());
 
 describe("/api", () => {
-  describe("404 ERROR: incorrect path", () => {
+  describe("ERRORS", () => {
     it("Status: 404 when passed an incorrect path", () => {
       return request(app)
         .get("/ap")
@@ -19,6 +19,18 @@ describe("/api", () => {
         .then(({ body }) => {
           expect(body.msg).to.equal("Route not found!");
         });
+    });
+    it("Status: 405 for invalid method", () => {
+      const methods = ["put", "patch", "delete", "post"];
+      const methodPromises = methods.map(method => {
+        return request(app)
+          [method]("/api/topics")
+          .expect(405)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("method not allowed");
+          });
+      });
+      return Promise.all(methodPromises);
     });
   });
   describe("GET", () => {
@@ -142,7 +154,7 @@ describe("/api", () => {
         it("Status: 400 when passed an non-existent username", () => {
           return request(app)
             .get("/api/users/notaUsername")
-            .expect(400)
+            .expect(404)
             .then(({ body }) => {
               expect(body.msg).to.equal("Username is non existent");
             });
@@ -266,6 +278,22 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles).have.length(0);
+          });
+      });
+      it("Status: 404 when passed a non existent topic", () => {
+        return request(app)
+          .get("/api/articles?topic=notatopic")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Topic does not exist!");
+          });
+      });
+      it("Status: 404 when passed a non existent author", () => {
+        return request(app)
+          .get("/api/articles?author=notanauthor")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Topic does not exist!");
           });
       });
       describe("QUERY ERRORS", () => {
@@ -529,6 +557,7 @@ describe("/api", () => {
                 });
             });
             it("Status: 400 when posting with missing columns", () => {
+              //?????
               return request(app)
                 .post("/api/articles/1/comments")
                 .send({ username: "butter_bridge" })

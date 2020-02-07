@@ -5,11 +5,12 @@ const {
   handle400s,
   handle500s,
   handleCustomErrors,
-  handle422s
+  handle422s,
+  send405Error
 } = require("./errors");
 
 app.use(express.json());
-app.use("/api", apiRouter);
+app.use("/api", apiRouter).all(send405Error);
 
 app.use(handle400s);
 app.use(handle422s);

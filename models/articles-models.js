@@ -115,3 +115,27 @@ exports.checkArticleExists = id => {
       }
     });
 };
+
+exports.checkTopicExists = topic => {
+  return connection
+    .select("*")
+    .from("topics")
+    .where("slug", "=", topic)
+    .then(topics => {
+      if (!topics.length) {
+        return Promise.reject({ status: 404, msg: "Topic does not exist!" });
+      }
+    });
+};
+
+exports.checkAuthorExists = author => {
+  return connection
+    .select("*")
+    .from("articles")
+    .where("author", "=", author)
+    .then(author => {
+      if (!author.length) {
+        return Promise.reject({ status: 404, msg: "Topic does not exist!" });
+      }
+    });
+};
