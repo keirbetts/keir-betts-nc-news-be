@@ -6,8 +6,11 @@ const articlesRouter = require("../routers/articles-router");
 const commentsRouter = require("../routers/comments-router");
 //const apiInfoController = require("../controllers/api-info-controller");
 const apiInfo2 = require("../api-info");
+const { send405Error } = require("../errors");
 
-apiRouter.get("/", (req, res, next) => res.json({ msg: apiInfo2 }));
+apiRouter
+  .get("/", (req, res, next) => res.json({ msg: apiInfo2 }))
+  .all(send405Error);
 apiRouter.use("/topics", topicsRouter);
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/articles", articlesRouter);

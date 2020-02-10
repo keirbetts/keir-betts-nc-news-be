@@ -293,7 +293,7 @@ describe("/api", () => {
           .get("/api/articles?author=notanauthor")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).to.equal("Topic does not exist!");
+            expect(body.msg).to.equal("Author does not exist!");
           });
       });
       describe("QUERY ERRORS", () => {
@@ -561,6 +561,18 @@ describe("/api", () => {
               return request(app)
                 .post("/api/articles/1/comments")
                 .send({ username: "butter_bridge" })
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body.msg).to.equal(
+                    "Bad Request-You have done something wrong!"
+                  );
+                });
+            });
+
+            it("Status: 400 when posting with missing columns", () => {
+              return request(app)
+                .post("/api/articles/1/comments")
+                .send({ body: "comment" })
                 .expect(400)
                 .then(({ body }) => {
                   expect(body.msg).to.equal(

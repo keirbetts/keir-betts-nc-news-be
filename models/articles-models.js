@@ -135,7 +135,7 @@ exports.checkAuthorExists = author => {
     .where("author", "=", author)
     .then(author => {
       if (!author.length) {
-        return Promise.reject({ status: 404, msg: "Topic does not exist!" });
+        return Promise.reject({ status: 404, msg: "Author does not exist!" });
       }
     });
 };
