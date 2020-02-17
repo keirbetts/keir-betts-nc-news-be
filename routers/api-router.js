@@ -4,7 +4,6 @@ const topicsRouter = require("../routers/topics-router");
 const usersRouter = require("../routers/users-router");
 const articlesRouter = require("../routers/articles-router");
 const commentsRouter = require("../routers/comments-router");
-//const apiInfoController = require("../controllers/api-info-controller");
 const apiInfo2 = require("../api-info");
 const { send405Error } = require("../errors");
 
