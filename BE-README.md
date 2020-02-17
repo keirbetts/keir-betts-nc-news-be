@@ -14,6 +14,8 @@ https://github.com/keirbetts/keir-betts-nc-news-be
 
 Run heroku open in the terminal to view the back-end API
 
+### 'add /api to the end of the url in the browser to see an overview of all endpoints'
+
 ### `Running the tests`
 
 npm run test: To view the tests for the models and controllers. These ensure the data is being sent to the API correctly, and include extensive error handling.
