@@ -6,8 +6,7 @@ const {
   handle400s,
   handle500s,
   handleCustomErrors,
-  handle422s,
-  send405Error
+  handle422s
 } = require("./errors");
 
 app.use(cors());
